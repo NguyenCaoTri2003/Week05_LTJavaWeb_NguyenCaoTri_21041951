@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang Tuyển Dụng</title>
+</head>
+<body>
+<h1>Các công việc tuyển dụng</h1>
+<div>
+    <form action="#" th:action="@{/jobs/suggestions/{candidateId}(candidateId=${candidate.id})}" method="get">
+        <label for="candidateId">Chọn ứng viên:</label>
+        <select id="candidateId" name="candidateId">
+            <!-- Render danh sách ứng viên -->
+        </select>
+        <button type="submit">Gợi ý công việc</button>
+    </form>
+</div>
+
+<div>
+    <h2>Công việc phù hợp</h2>
+    <div th:each="job : ${jobs}">
+        <p th:text="${job.jobName}"></p>
+        <form action="#" th:action="@{/jobs/send-invite/{candidateId}(candidateId=${candidate.id})}" method="post">
+            <input type="hidden" th:value="${job.id}" name="jobId"/>
+            <button type="submit">Gửi mời ứng tuyển</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
