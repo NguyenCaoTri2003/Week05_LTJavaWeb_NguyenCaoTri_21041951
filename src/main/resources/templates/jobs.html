@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job List</title>
+</head>
+<body>
+<h1>Danh sách công việc</h1>
+
+<form action="/search-jobs" method="get">
+    <input type="text" name="search" placeholder="Tìm kiếm công việc" />
+    <input type="text" name="skills" placeholder="Nhập kỹ năng (comma separated)" />
+    <button type="submit">Tìm kiếm</button>
+</form>
+
+<!-- Nút Thêm công việc -->
+<a href="/jobs/new">Thêm công việc mới</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>Tiêu đề công việc</th>
+        <th>Công ty</th>
+        <th>Kỹ năng</th>
+        <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Duyệt qua danh sách công việc -->
+    <tr th:each="job : ${jobs}">
+        <td th:text="${job.name}"></td>
+        <td th:text="${job.company.name}"></td>
+        <td>
+            <!-- Duyệt qua các kỹ năng của công việc -->
+            <span th:each="jobSkill : ${job.jobSkills}">
+                <span th:text="${jobSkill.skill.skillName}">Kỹ năng</span>
+                <span> | </span>
+            </span>
+        </td>
+        <td>
+            <!-- Liên kết Chi tiết công việc -->
+            <a th:href="@{'/jobs/' + ${job.id}}">Chi tiết</a>
+            <!-- Nút Xóa công việc -->
+            <form action="/jobs/delete" method="post" style="display:inline;">
+                <input type="hidden" name="jobId" th:value="${job.id}"/>
+                <button type="submit">Xóa</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div>
+    <!-- Hiển thị phân trang -->
+    <span th:each="pageNum : ${pageNumbers}">
+        <a th:href="@{/jobs(page=${pageNum - 1}, size=10)}" th:text="${pageNum}"></a>
+    </span>
+</div>
+
+</body>
+</html>

@@ -18,6 +18,7 @@ public class Job {
     private long id;
     @Column(name = "job_name")
     private String name;
+
     @OneToOne
     @JoinColumn(name = "company")
     private Company company;

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Công Việc</title>
+</head>
+<body>
+<h1>Thêm Công Việc Mới</h1>
+
+<form action="/jobs/new" method="post">
+    <label for="name">Tiêu đề công việc:</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="company">Công ty:</label>
+    <select id="company" name="company" required>
+        <option value="">Chọn công ty</option>
+        <!-- Lặp qua danh sách công ty và tạo các option -->
+        <th:block th:each="company : ${companies}">
+            <option th:value="${company.id}" th:text="${company.name}"></option>
+        </th:block>
+    </select>
+
+    <label for="skills">Kỹ năng:</label>
+    <select id="skills" name="skills"  required>
+        <option value="">Chọn kỹ năng</option>
+        <!-- Lặp qua danh sách kỹ năng và tạo các option -->
+        <th:block th:each="skill : ${skills}">
+            <option th:value="${skill.id}" th:text="${skill.skillName}"></option>
+        </th:block>
+    </select>
+
+    <button type="submit">Thêm công việc</button>
+</form>
+
+</body>
+</html>

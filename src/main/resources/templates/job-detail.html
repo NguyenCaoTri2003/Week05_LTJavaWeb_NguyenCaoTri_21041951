@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết công việc</title>
+</head>
+<body>
+<h1>Chi tiết công việc</h1>
+
+<!-- Hiển thị thông tin công việc -->
+<div>
+    <h2 th:text="${job.name}">Tên công việc</h2>
+    <p><strong>Công ty:</strong> <span th:text="${job.company.name}"></span></p>
+    <p><strong>Mô tả công việc:</strong> <span th:text="${job.description}"></span></p>
+</div>
+
+<!-- Hiển thị các kỹ năng yêu cầu -->
+<div>
+    <h3>Kỹ năng yêu cầu:</h3>
+    <ul>
+        <li th:each="jobSkill : ${job.jobSkills}">
+            <span th:text="${jobSkill.skill.skillName}"></span> -
+            <span th:text="${jobSkill.skillLevel}"></span> <!-- Nếu cần chuyển đổi SkillLevel thành tên dễ đọc hơn -->
+        </li>
+    </ul>
+</div>
+
+<!-- Hành động (quay lại danh sách công việc) -->
+<div>
+    <a th:href="@{/jobs}">Quay lại danh sách công việc</a> <!-- Thêm tham số nếu cần duy trì trạng thái phân trang hoặc tìm kiếm -->
+</div>
+
+</body>
+</html>

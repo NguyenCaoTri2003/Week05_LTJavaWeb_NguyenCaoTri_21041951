@@ -1,53 +1,130 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<style>
+    .pagination {
+        display: flex;
+        flex-wrap: wrap; /* Buộc xuống dòng */
+        justify-content: center; /* Căn giữa */
+        gap: 5px; /* Khoảng cách giữa các nút */
+    }
+</style>
 <head>
     <meta charset="UTF-8">
     <title>Candidates</title>
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-
-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-            crossorigin="anonymous">
+            rel="stylesheet">
     <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-
-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-            crossorigin="anonymous"></script>
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div th:switch="${candidates}" >
-    <h2 th:case="null">No candidates yet!</h2>
-    <div th:case="*">
+<div class="container mt-5">
+<!--    <form action="/candidates/search" method="get" class="mb-4">-->
+<!--        <div class="input-group">-->
+<!--            <input type="text" class="form-control" placeholder="Enter skills (comma-separated)" name="skills">-->
+<!--            <select class="form-select" name="skillLevel">-->
+<!--                <option value="">Select Skill Level</option>-->
+<!--                <option value="BEGINNER">Beginner</option>-->
+<!--                <option value="INTERMEDIATE">Intermediate</option>-->
+<!--                <option value="ADVANCED">Advanced</option>-->
+<!--            </select>-->
+<!--            <input type="text" class="form-control" placeholder="Search keyword (e.g., Name or Skill)" name="search">-->
+<!--            <button class="btn btn-primary" type="submit">Search</button>-->
+<!--        </div>-->
+<!--    </form>-->
+    <form action="/candidates/search" method="get" class="mb-4">
+        <div class="input-group">
+            <!-- Tìm kiếm theo kỹ năng -->
+            <input type="text" class="form-control" placeholder="Enter skill name" name="skillName">
+
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+    <div th:if="${candidates == null || candidates.isEmpty()}">
+        <h2>No candidates yet!</h2>
+    </div>
+    <div th:if="${candidates != null && !candidates.isEmpty()}">
         <h2>Candidates</h2>
-        <table class="table table-hover">
+        <table class="table table-hover table-bordered">
             <thead>
             <tr>
                 <th>Id</th>
                 <th>Name</th>
                 <th>dob</th>
-                <th>address</th>
-                <th>phone</th>
-                <th>email</th>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Invite</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="candidate : ${candidates}">
-                <td th:text="${candidate.id}"></td>
-                <td th:text="${candidate.fullName}"></td>
-                <td th:text="${candidate.dob}"></td>
-                <td th:text="${candidate.address}"></td>
-                <td th:text="${candidate.phone}"></td>
-                <td th:text="${candidate.email}"></td>
-                <td><a th:href="@{/edit/{id}(id=${candidate.id})}">Edit</a></td>
-                <td><a th:href="@{/delete/{id}(id=${candidate.id})}">Delete</a></td>
-            </tr>
+                <tr th:each="candidate : ${candidates}">
+                    <td th:text="${candidate.id}"></td>
+                    <td th:text="${candidate.fullName}"></td>
+                    <td th:text="${candidate.dob}"></td>
+                    <td th:text="${candidate.address}"></td>
+                    <td th:text="${candidate.phone}"></td>
+                    <td th:text="${candidate.email}"></td>
+                    <td>
+                        <form action="/invite" method="post">
+                            <input type="hidden" name="candidateId" th:value="${candidate.id}">
+                            <button type="submit" class="btn btn-success">Send Invite</button>
+                        </form>
+                    </td>
+                </tr>
             </tbody>
         </table>
+<!--        <div th:if="${totalPages != null}">-->
+<!--            <nav>-->
+<!--                <ul class="pagination">-->
+<!--                    <li class="page-item">-->
+<!--                        <a class="page-link" th:href="@{|/candidates?page=0|}">First</a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages-1)}">-->
+<!--                        <a class="page-link" th:href="@{|/candidates?page=${i}|}" th:text="${i + 1}"></a>-->
+<!--                    </li>-->
+<!--                    <li class="page-item">-->
+<!--                        <a class="page-link" th:href="@{|/candidates?page=${totalPages-1}|}">Last</a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--        </div>-->
+        <div th:if="${totalPages > 1}">
+            <nav>
+                <ul class="pagination justify-content-center flex-wrap">
+                    <!-- Nút 'First' -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/list?page=0|}">First</a>
+                    </li>
+
+                    <!-- Nút 'Previous' -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/list?page=${currentPage - 1}|}">Previous</a>
+                    </li>
+
+                    <!-- Các nút số trang -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{|/list?page=${i}|}" th:text="${i + 1}"></a>
+                    </li>
+
+                    <!-- Nút 'Next' -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/list?page=${currentPage + 1}|}">Next</a>
+                    </li>
+
+                    <!-- Nút 'Last' -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{|/list?page=${totalPages - 1}|}">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+
     </div>
 </div>
 </body>
 </html>
+

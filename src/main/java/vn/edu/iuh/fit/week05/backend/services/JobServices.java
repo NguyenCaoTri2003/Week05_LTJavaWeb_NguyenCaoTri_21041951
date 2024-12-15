@@ -1,52 +1,81 @@
 package vn.edu.iuh.fit.week05.backend.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import vn.edu.iuh.fit.week05.backend.models.*;
-import vn.edu.iuh.fit.week05.backend.repositories.CandidateRepository;
-import vn.edu.iuh.fit.week05.backend.repositories.CandidateSkillRepository;
+import vn.edu.iuh.fit.week05.backend.models.Company;
+import vn.edu.iuh.fit.week05.backend.models.Job;
+import vn.edu.iuh.fit.week05.backend.models.JobSkill;
+import vn.edu.iuh.fit.week05.backend.models.Skill;
+import vn.edu.iuh.fit.week05.backend.repositories.CompanyRepository;
 import vn.edu.iuh.fit.week05.backend.repositories.JobRepository;
+import vn.edu.iuh.fit.week05.backend.repositories.JobSkillRepository;
+import vn.edu.iuh.fit.week05.backend.repositories.SkillRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JobServices {
+
     @Autowired
     private JobRepository jobRepository;
 
     @Autowired
-    private CandidateSkillRepository candidateSkillRepository;
+    private JobSkillRepository jobSkillRepository;
 
     @Autowired
-    private CandidateRepository candidateRepository;
+    private SkillRepository skillRepository;  // Thêm SkillRepository
 
-    // Gợi ý công việc cho ứng viên dựa trên kỹ năng
-    public List<Job> suggestJobsForCandidate(Candidate candidate) {
-        // Lấy danh sách kỹ năng của ứng viên từ CandidateSkill
-        List<CandidateSkill> candidateSkills = candidateSkillRepository.findByCandidateId(candidate.getId());
+    @Autowired
+    private CompanyRepository companyRepository;  // Thêm CompanyRepository
 
-        List<Job> suggestedJobs = new ArrayList<>();
-        for (CandidateSkill candidateSkill : candidateSkills) {
-            // Tìm công việc theo kỹ năng
-            suggestedJobs.addAll(jobRepository.findByJobSkills_SkillId(candidateSkill.getSkill().getId()));
-        }
-
-        return suggestedJobs;
+    // Lấy tất cả công việc với phân trang
+    public Page<Job> getAllJobs(Pageable pageable) {
+        return jobRepository.findAll(pageable);
     }
 
-    // Tìm ứng viên phù hợp với công việc
-    public List<Candidate> findCandidatesForJob(Job job) {
-        List<Candidate> suitableCandidates = new ArrayList<>();
-        for (JobSkill jobSkill : job.getJobSkills()) {
-            // Lấy danh sách CandidateSkill theo kỹ năng từ JobSkill
-            List<CandidateSkill> candidateSkills = candidateSkillRepository.findBySkillId(jobSkill.getSkill().getId());
-            for (CandidateSkill candidateSkill : candidateSkills) {
-                suitableCandidates.add(candidateSkill.getCandidate());
-            }
+    // Tìm kiếm công việc theo kỹ năng và tên
+    public List<Job> findJobsBySkillsAndSearch(List<String> skills, String search) {
+        if (skills.isEmpty() && (search == null || search.isEmpty())) {
+            return jobRepository.findAll();  // Nếu không có tìm kiếm, trả về tất cả công việc
+        } else if (!skills.isEmpty()) {
+            // Tìm kiếm JobSkill theo kỹ năng
+            List<Skill> skillEntities = skillRepository.findBySkillNameIn(skills);
+            List<JobSkill> jobSkills = jobSkillRepository.findBySkillIn(skillEntities);
+            return jobSkills.stream()
+                    .map(JobSkill::getJob)
+                    .distinct()
+                    .collect(Collectors.toList());
+        } else {
+            return jobRepository.findByNameContaining(search);
         }
-        return suitableCandidates;
     }
+
+    // Tìm công việc theo ID
+    public Job findJobById(Long jobId) {
+        return jobRepository.findById(jobId).orElse(null);
+    }
+
+
+    // Lưu công việc mới
+    public void saveJob(Job job) {
+        jobRepository.save(job);
+    }
+
+    // Xóa công việc
+    public void deleteJob(Long jobId) {
+        jobRepository.deleteById(jobId);
+    }
+    // Lấy tất cả công ty
+    public List<Company> getAllCompanies() {
+        return companyRepository.findAll();
+    }
+
+    // Lấy tất cả kỹ năng
+    public List<Skill> getAllSkills() {
+        return skillRepository.findAll();
+    }
+
 }
-
-
